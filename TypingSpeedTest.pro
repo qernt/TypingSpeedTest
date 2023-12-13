@@ -10,13 +10,16 @@ CONFIG += c++17
 
 SOURCES += \
     main.cpp \
-    mainwindow.cpp
+    mainwindow.cpp \
+    overlay.cpp
 
 HEADERS += \
-    mainwindow.h
+    mainwindow.h \
+    overlay.h
 
 FORMS += \
-    mainwindow.ui
+    mainwindow.ui \
+    overlay.ui
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin

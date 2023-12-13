@@ -1,5 +1,6 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
+#include "overlay.h"
 
 #include <fstream>
 #include <vector>
@@ -7,7 +8,14 @@
 #include <cstdlib>
 #include <ctime>
 
+#include <QMainWindow>
+#include <QWidget>
+#include <QPushButton>
+#include <QVBoxLayout>
+#include <QGraphicsOpacityEffect>
+
 std::vector<std::string> words;
+Overlay *overlayWidget;
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
@@ -16,6 +24,8 @@ MainWindow::MainWindow(QWidget *parent)
     ui->setupUi(this);
     loadWords();
     setRandomWord();
+
+    createOverlay();
 }
 
 MainWindow::~MainWindow()
@@ -33,6 +43,24 @@ void MainWindow::countAccuracy(const int typedLetters, const int correctLetters)
     ui->label_accuracy->setText(QString::number(accuracy) + "%");
 }
 
+void MainWindow::resizeEvent(QResizeEvent *event)
+{
+    QWidget::resizeEvent(event);
+
+    if(overlayWidget != nullptr){
+        overlayWidget->setFixedSize(this->size());
+    }
+}
+
+void MainWindow::createOverlay()
+{
+    overlayWidget = new Overlay(this);
+    overlayWidget->setFixedSize(this->size());
+    overlayWidget->setStyleSheet("background-color: black;");
+
+    this->stackUnder(overlayWidget);
+}
+
 void MainWindow::loadWords(){
     std::ifstream inputFile("/Users/alexeygolubev/Documents/programming/TypingSpeedTest/words.txt");
 
@@ -43,9 +71,6 @@ void MainWindow::loadWords(){
 
     std::string word;
     while (inputFile >> word) {
-        if (word[0] == '#') {
-            continue;
-        }
         words.push_back(word);
     }
 
@@ -54,8 +79,6 @@ void MainWindow::loadWords(){
 
 void MainWindow::setRandomWord()
 {
-    std::srand(static_cast<unsigned int>(std::time(nullptr)));
-
     if (!words.empty()) {
         int randomIndex = std::rand() % words.size();
         std::string randomWord = words[randomIndex];
@@ -67,6 +90,10 @@ void MainWindow::setRandomWord()
 
 void MainWindow::keyPressEvent(QKeyEvent *event)
 {
+    if(!getIsStarted()){
+        return;
+    }
+
     static QString enteredWord = "";
     static int cursorPosition = 0;
     static QString necessaryWord = ui->label->text();
@@ -94,6 +121,10 @@ void MainWindow::keyPressEvent(QKeyEvent *event)
         enteredWord = "";
         ui->label_2->setText(enteredWord);
     }
-
-//    QWidget::keyPressEvent(event);
 }
+
+void MainWindow::on_pushButton_clicked()
+{
+    changeStatusOfIsStarted();
+}
+
