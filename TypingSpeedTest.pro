@@ -12,12 +12,14 @@ SOURCES += \
     game.cpp \
     main.cpp \
     mainwindow.cpp \
-    overlay.cpp
+    overlay.cpp \
+    timer.cpp
 
 HEADERS += \
     game.h \
     mainwindow.h \
-    overlay.h
+    overlay.h \
+    timer.h
 
 FORMS += \
     game.ui \

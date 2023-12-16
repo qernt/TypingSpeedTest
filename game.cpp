@@ -1,29 +1,49 @@
 #include "game.h"
 #include "ui_game.h"
 
+#include "timer.h"
+#include "mainwindow.h"
+
+
 #include <fstream>
 #include <vector>
 #include <string>
 #include <cstdlib>
 #include <ctime>
 
-#include <QMainWindow>
 #include <QWidget>
-#include <QPushButton>
-#include <QVBoxLayout>
-#include <QGraphicsOpacityEffect>
+#include <QThread>
 
 std::vector<std::string> words;
+
+const int TIMER_DURATION = 2;
+
+QThread *timerThread;
+Timer *timer;
 
 Game::Game(QWidget *parent) :
     QWidget(parent),
     ui(new Ui::Game)
 {
     ui->setupUi(this);
+    setFocusPolicy(Qt::StrongFocus);
+
+    ui->label_timer->setText(QString::number(TIMER_DURATION));
+
+    loadWords();
+    setRandomWord();
+    startTimer();
+
+    MainWindow *mainWindow = qobject_cast<MainWindow*>(parent);
+
+    connect(timerThread, &QThread::started, timer, &Timer::start);
+    connect(timer, &Timer::updateLabel, this, &Game::updateLabelSlot);
+    connect(timer, &Timer::finished, mainWindow, &MainWindow::endGame);
 }
 
 Game::~Game()
 {
+    stopTimer();
     delete ui;
 }
 
@@ -37,6 +57,11 @@ void Game::countAccuracy(const int typedLetters, const int correctLetters)
 {
     int accuracy = correctLetters * 100 / typedLetters;
     ui->label_accuracy->setText(QString::number(accuracy) + "%");
+}
+
+Timer* Game::getTimer() const
+{
+    return timer;
 }
 
 void Game::keyPressEvent(QKeyEvent *event)
@@ -100,4 +125,26 @@ void Game::setRandomWord()
     }else{
         qDebug() << "No loaded words!";
     }
+}
+
+void Game::updateLabelSlot(QString remainingTime)
+{
+    ui->label_timer->setText(remainingTime);
+}
+
+void Game::startTimer()
+{
+    timerThread = new QThread(this);
+    timer = new Timer(TIMER_DURATION);
+    timer->moveToThread(timerThread);
+    timerThread->start();
+}
+
+void Game::stopTimer()
+{
+    if (timerThread->isRunning()) {
+        timerThread->quit();
+        timerThread->wait();
+    }
+    delete timerThread;
 }

@@ -8,6 +8,8 @@
 #include <QTextDocument>
 #include <QTextCursor>
 
+#include "timer.h"
+
 namespace Ui {
 class Game;
 }
@@ -56,19 +58,22 @@ public:
         }
     }
 
+    Timer* getTimer() const;
+
 protected:
     void keyPressEvent(QKeyEvent *event) override;
-
     void loadWords();
-
     void setRandomWord();
+    void updateLabelSlot(QString remainingTime);
+    void startTimer();
+    void stopTimer();
 
 private:
     Ui::Game *ui;
     int wordCounter = 0;
     int typedLettersCounter = 0;
     int correctLettersCounter = 0;
-    bool isStarted = false;
+    bool isStarted = true;
 };
 
 #endif // GAME_H

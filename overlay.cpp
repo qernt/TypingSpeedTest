@@ -12,3 +12,8 @@ Overlay::~Overlay()
 {
     delete ui;
 }
+
+QPushButton* Overlay::getPushButton() const
+{
+    return ui->pushButton;
+}

@@ -15,6 +15,9 @@ public:
     explicit Overlay(QWidget *parent = nullptr);
     ~Overlay();
 
+    QPushButton* getPushButton() const;
+
+
 private:
     Ui::Overlay *ui;
 };
